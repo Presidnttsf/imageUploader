@@ -1,10 +1,10 @@
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import ImageCard from "./ImgCard"
+import ImageCard from "./ImgCard";
 
 export default function ImageUpload() {
-  const { register, handleSubmit, reset, watch } = useForm();
+  const { register, handleSubmit, reset, watch, setValue } = useForm();
   const [message, setMessage] = useState("");
   const [images, setImages] = useState([]);
   const [show, setShow] = useState(false);
@@ -16,7 +16,6 @@ export default function ImageUpload() {
       try {
         const response = await axios.get("http://localhost:5001/images");
         setImages(response.data);
-        console.log("checking rd", response.data)
       } catch (error) {
         console.error("Error fetching images:", error);
       }
@@ -43,60 +42,50 @@ export default function ImageUpload() {
       });
 
       setMessage("✅ Image uploaded successfully!");
-      setTimeout(()=>setMessage(""), 1000)
+      setTimeout(() => setMessage(""), 1000);
       reset();
-      setImages((prevImages) => [...prevImages, response.data]);
+      setImages((prevImages) => [response.data, ...prevImages]);
     } catch (error) {
       setMessage("❌ Upload failed. Try again.");
     }
   };
 
+  const removeImage = () => {
+    setValue("image", null);
+  };
+
   return (
-    <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-md mt-10">
-      <h2 className="text-xl font-bold mb-4">Upload Image</h2>
-      {message && <p className="text-red-500 mb-2">{message}</p>}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          type="text"
-          placeholder="Name"
-          {...register("name", { required: true })}
-          className="w-full p-2 border rounded mb-2"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          {...register("email", { required: true })}
-          className="w-full p-2 border rounded mb-2"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          {...register("image", { required: true })}
-          className="w-full p-2 border rounded mb-4"
-        />
-        {previewUrl && (
-          <img src={previewUrl} alt="Preview" className="w-full h-40 object-cover mb-4 rounded" />
-        )}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 p-2 rounded hover:bg-blue-600"
-        >
-          Upload
+    <div className="container mt-5">
+      <div className="card p-4 shadow-lg">
+        <h2 className="mb-3">Upload Image</h2>
+        {message && <p className="text-danger">{message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <input type="text" placeholder="Name" {...register("name", { required: true })} className="form-control mb-2" />
+          <input type="email" placeholder="Email" {...register("email", { required: true })} className="form-control mb-2" />
+          <input type="file" accept="image/*" {...register("image", { required: true })} className="form-control mb-3" />
+          {previewUrl && (
+            <div className="position-relative mb-3">
+              <img src={previewUrl} alt="Preview" className="img-fluid rounded" />
+              <button type="button" onClick={removeImage} className="btn btn-danger btn-sm position-absolute top-0 end-0 m-2">
+                ✖
+              </button>
+            </div>
+          )}
+          <button type="submit" className="btn btn-primary w-100">Upload</button>
+        </form>
+        <button onClick={() => setShow(!show)} className="btn btn-secondary mt-3 w-100">
+          {show ? "Click to hide images" : "Click to see images"}
         </button>
-      </form>
-      <button onClick={()=>setShow(!show)}>{show ? "Click to hide images" : "Click to see images"}</button>
-      
-{show ? <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-
-  {images.slice().reverse().map((image) => (
-    
-    <div key={image._id}>
-      <ImageCard image={image} />
-    </div>
-  ))}
-</div> : null }
-
+        {show && (
+          <div className="mt-3 d-flex flex-wrap gap-2">
+            {images.map((image) => (
+              <div key={image._id}>
+                <ImageCard image={image} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-    
+    </div>
   );
 }
