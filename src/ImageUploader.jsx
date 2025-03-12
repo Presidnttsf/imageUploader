@@ -15,7 +15,7 @@ export default function ImageUpload() {
     const fetchImages = async () => {
       try {
         const response = await axios.get("http://localhost:5001/images");
-        setImages(response.data);
+        setImages(response.data.reverse());
       } catch (error) {
         console.error("Error fetching images:", error);
       }
@@ -41,12 +41,13 @@ export default function ImageUpload() {
         },
       });
 
-      setMessage("✅ Image uploaded successfully!");
+      setMessage(response.data.message);
       setTimeout(() => setMessage(""), 1000);
       reset();
       setImages((prevImages) => [response.data, ...prevImages]);
     } catch (error) {
-      setMessage("❌ Upload failed. Try again.");
+        console.log("checking error", )
+      setMessage(error.response.data.message);
     }
   };
 
