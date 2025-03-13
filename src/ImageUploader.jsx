@@ -55,6 +55,16 @@ export default function ImageUpload() {
     setValue("image", null);
   };
 
+  const deleteImage = async (id) => {
+    try {
+        await axios.delete(`http://localhost:5001/delete/${id}`);
+        setImages((prevImages) => prevImages.filter((img) => img._id !== id));
+    } catch (error) {
+        console.error("Error deleting image:", error.response?.data?.message || error.message);
+    }
+};
+
+
   return (
     <div className="container mt-5">
       <div className="card p-4 shadow-lg">
@@ -79,9 +89,10 @@ export default function ImageUpload() {
         </button>
         {show && (
           <div className="mt-3 d-flex flex-wrap gap-2">
-            {images.map((image) => (
+            {images.map((image, index) => (
               <div key={image._id}>
-                <ImageCard image={image} />
+                <ImageCard image={image} deleteImage={deleteImage} index={index}/>
+                
               </div>
             ))}
           </div>
